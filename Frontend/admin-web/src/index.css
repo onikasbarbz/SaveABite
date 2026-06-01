@@ -1,0 +1,29 @@
+/* 1. Imports ALWAYS go first */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+/* 2. Variables and Root styles second */
+:root {
+  --font-sans: 'Plus Jakarta Sans', sans-serif;
+  --color-brand-green: #244F42;
+  --color-brand-gold: #F5A623;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden; 
+  font-family: var(--font-sans);
+}
+
+/* 3. Custom Scrollbar last */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-brand-green);
+  border-radius: 10px;
+}

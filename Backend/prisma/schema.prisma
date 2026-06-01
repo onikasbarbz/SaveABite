@@ -1,0 +1,170 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// Application roles
+enum UserRole {
+  business
+  driver
+  consumer
+  ngo
+  admin
+}
+
+model User {
+  id                Int                @id @default(autoincrement())
+  full_name         String             @db.VarChar(255)
+  email             String             @unique @db.VarChar(255)
+  phone             String?            @db.VarChar(50)
+  password          String?            @db.VarChar(255)
+  googleId          String?            @unique @map("google_id") @db.VarChar(255)
+  role              String             @db.VarChar(50)
+  isVerified        Boolean            @default(false) @map("is_verified")
+  isBanned          Boolean            @default(false) @map("is_banned")
+  resetToken        String?            @map("reset_token") @db.VarChar(255)
+  resetTokenExpiry  DateTime?          @map("reset_token_expiry") @db.Timestamptz(6)
+  createdAt         DateTime?          @default(now()) @map("created_at") @db.Timestamptz(6)
+  store_name        String?            @db.VarChar(255)
+  store_lat         Float?
+  store_lng         Float?
+  store_address     String?            @db.VarChar(500)
+  profile_image     String?
+  cover_image       String?
+  identity_document String?   @db.VarChar(255)
+  listings          listings[]
+  ngo_registrations ngo_registrations?
+  reservations      reservations[]
+  ngo_donations     donations[]        @relation("NgoDonations")
+
+  // Gamification
+  points            user_points?
+  notifications     notifications[]
+
+  @@index([email], map: "idx_users_email")
+  @@map("users")
+}
+
+model listings {
+  id                 Int            @id @default(autoincrement())
+  store_id           Int?
+  category           String         @db.VarChar(50)
+  original_price     Decimal        @db.Decimal(10, 2)
+  selling_price      Decimal        @db.Decimal(10, 2)
+  is_surprise_bag    Boolean?       @default(false)
+  dietary_preference String?        @db.VarChar(30)
+  health_note        String?
+  rescue_deadline    DateTime?      @db.Timestamptz(6)
+  ngo_expiry         DateTime?      @db.Timestamptz(6)
+  auto_donate        Boolean?       @default(false)
+  image_url          String?
+  created_at         DateTime?      @default(now()) @db.Timestamptz(6)
+  stock_quantity     Int?           @default(1)
+  is_active          Boolean?       @default(true)
+  item_name          String?        @db.VarChar(255)
+  users              User?          @relation(fields: [store_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  reservations       reservations[]
+  donations          donations[]
+}
+
+model ngo_registrations {
+  id             Int       @id @default(autoincrement())
+  name           String    @db.VarChar(255)
+  reg_number     String    @unique @db.VarChar(100)
+  country        String?   @default("Nepal") @db.VarChar(100)
+  address        String?
+  contact_person String?   @db.VarChar(255)
+  phone          String?   @db.VarChar(20)
+  email          String    @db.VarChar(255)
+  description    String?
+  user_id        Int?      @unique(map: "unique_user_ngo")
+  status           String?   @default("pending") @db.VarChar(20)
+  document_image   String?   @db.VarChar(255)
+  rejection_reason String?
+  created_at       DateTime? @default(now()) @db.Timestamp(6)
+  users          User?     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_user_ngo")
+}
+
+model reservations {
+  id               Int       @id @default(autoincrement())
+  listing_id       Int?
+  user_id          Int?
+  status           String?   @default("pending") @db.VarChar(20)
+  reserved_at      DateTime? @default(now()) @db.Timestamp(6)
+  pickup_code      String?   @db.VarChar(10)
+  picked_up_at     DateTime? @db.Timestamptz(6)
+  order_type       String?   @default("pickup") @db.VarChar(20)
+  delivery_lat     Float?
+  delivery_lng     Float?
+  delivery_address String?   @db.VarChar(500)
+  delivery_fee     Decimal?  @default(0) @db.Decimal(10, 2)
+  driver_id        Int?
+  driver_name      String?   @db.VarChar(255)
+  driver_phone     String?   @db.VarChar(50)
+  delivered_at     DateTime? @db.Timestamptz(6)
+  driver_rating    Int?      @db.SmallInt
+  payment_method   String?   @default("online") @db.VarChar(20)
+  listings         listings? @relation(fields: [listing_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users            User?     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model donations {
+  id                 Int       @id @default(autoincrement())
+  listing_id         Int
+  ngo_id             Int?
+  /// available | accepted | proof_pending | verified | delivery_unconfirmed
+  status             String    @default("available") @db.VarChar(30)
+  quantity           Int       @default(1)
+  created_at         DateTime  @default(now()) @db.Timestamptz(6)
+  accepted_at        DateTime? @db.Timestamptz(6)
+  /// Set when the restaurant marks the donation as picked up by the NGO
+  picked_up_at       DateTime? @db.Timestamptz(6)
+  proof_deadline_at  DateTime? @db.Timestamptz(6)
+  proof_image_url    String?   @db.VarChar(500)
+  proof_uploaded_at  DateTime? @db.Timestamptz(6)
+  certificate_requested    Boolean?  @default(false)
+  certificate_requested_at DateTime? @db.Timestamptz(6)
+  certificate_url          String?   @db.VarChar(500)
+  listings           listings  @relation(fields: [listing_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  ngo                User?     @relation("NgoDonations", fields: [ngo_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model impact_stats {
+  id           Int      @id @default(autoincrement())
+  meals_saved  Int      @default(0)
+  kg_rescued   Decimal  @default(0) @db.Decimal(10, 2)
+  co2_reduced  Decimal  @default(0) @db.Decimal(10, 2)
+  updated_at   DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+}
+
+model user_points {
+  id     Int    @id @default(autoincrement())
+  user_id Int   @unique
+  points  Int   @default(0)
+  level   String @default("Seed Saver") @db.VarChar(50)
+  badges  Json?
+  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model notifications {
+  id         Int      @id @default(autoincrement())
+  user_id    Int
+  title      String   @db.VarChar(255)
+  message    String
+  is_read    Boolean  @default(false)
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model advertisements {
+  id         Int      @id @default(autoincrement())
+  title      String   @db.VarChar(255)
+  image_url  String   @db.VarChar(500)
+  link_url   String?  @db.VarChar(500)
+  is_active  Boolean  @default(true)
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+}
