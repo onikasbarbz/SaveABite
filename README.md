@@ -1,4 +1,5 @@
-# SaveABite <img width="80" height="80" alt="SaveABite logo" src="https://github.com/user-attachments/assets/8ff2cf7e-9fb3-4be0-a350-ac872b42d260" />
+# SaveABite 
+<img width="80" height="80" alt="SaveABite logo" src="https://github.com/user-attachments/assets/8ff2cf7e-9fb3-4be0-a350-ac872b42d260" />
 
 
 **A cross-platform mobile-first app to reduce food waste in Nepal** — connecting restaurants with surplus food to consumers at discounted prices and NGOs for donation, within a single localised platform.
