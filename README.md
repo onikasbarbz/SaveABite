@@ -4,7 +4,7 @@
 
 **A cross-platform mobile-first app to reduce food waste in Nepal** — connecting restaurants with surplus food to consumers at discounted prices and NGOs for donation, within a single localised platform.
 
-> Final Year Project (FYP) — Built end-to-end: system design, database modelling, backend API, mobile app, and admin dashboard.
+> Final Year Project (FYP) : Built end-to-end: system design, database modelling, backend API, mobile app, and admin dashboard.
 
 [![License](https://img.shields.io/badge/license-All%20Rights%20Reserved-red)](./LICENSE) &nbsp; © 2025 Luniva Shrestha
 
