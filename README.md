@@ -1,4 +1,5 @@
-# SaveABite 🥗
+# SaveABite <img width="80" height="80" alt="SaveABite logo" src="https://github.com/user-attachments/assets/8ff2cf7e-9fb3-4be0-a350-ac872b42d260" />
+
 
 **A cross-platform mobile-first app to reduce food waste in Nepal** — connecting restaurants with surplus food to consumers at discounted prices and NGOs for donation, within a single localised platform.
 
@@ -350,6 +351,13 @@ Update `GOOGLE_CALLBACK_URL` and `KHALTI_RETURN_URL` in your `.env` to use the n
 ## System Documentation
 
 Project reports and full design documentation (SRS, UML, ERD, wireframes) will be added to a `/docs` folder in this repository.
+
+---
+
+
+## Artefact (Graphical representation of system)
+
+<img width="1450" height="838" alt="image" src="https://github.com/user-attachments/assets/d9100501-2f50-4ebb-b713-063885d2b6bb" />
 
 ---
 
