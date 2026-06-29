@@ -211,12 +211,12 @@ user_points, notifications, advertisements
 
 ## Running Locally
 
-> Note: This project was developed for local + ngrok environments. Full cloud deployment is not configured. The steps below get it running on your machine.
+> This project was developed on macOS with local + ngrok environments. Full cloud deployment is not configured.
 
 ### Prerequisites
 - Node.js 18+
 - PostgreSQL 14+
-- Expo CLI (`npm install -g expo-cli`)
+- npm install -g pm2
 - A Khalti sandbox account (for payment testing)
 - A Google Cloud project with OAuth 2.0 credentials
 
@@ -225,9 +225,11 @@ user_points, notifications, advertisements
 ### 1. Clone the repo
 
 ```bash
-git clone https://github.com/your-username/SaveABite.git
+git clone https://github.com/onikasbarbz/SaveABite.git
 cd SaveABite
 ```
+
+---
 
 ### 2. Backend setup
 
@@ -268,7 +270,7 @@ KHALTI_SECRET_KEY=your_khalti_test_secret_key
 KHALTI_RETURN_URL=http://localhost:5000/api/payment/return
 ```
 
-Run database migrations and start the server:
+Run database migrations:
 
 ```bash
 # Create the database first in psql:
@@ -276,10 +278,7 @@ Run database migrations and start the server:
 
 npx prisma migrate deploy
 npx prisma generate
-npm run dev
 ```
-
-The API will be live at `http://localhost:5000`.
 
 ---
 
@@ -303,13 +302,38 @@ export const BASE_URL = "http://192.168.x.x:5000";
 export const BASE_URL = "https://your-ngrok-url.ngrok-free.app";
 ```
 
+#### Choose how to run the app
+
+**Option A — Physical device (easiest)**
+1. Install [Expo Go](https://expo.dev/go) from the Play Store (Android) or App Store (iOS)
+2. Make sure your phone and laptop are on the **same WiFi network**
+3. Find your machine's local IP:
+   - Mac/Linux: `ifconfig | grep "inet " | grep -v 127.0.0.1`
+   - Windows: run `ipconfig` → look for **IPv4 Address**
+4. Set `BASE_URL` to that IP (e.g. `http://192.168.1.5:5000`)
+
+**Option B — Android emulator**
+1. Install [Android Studio](https://developer.android.com/studio)
+2. Open **Virtual Device Manager** → Create Device (Pixel 6, API 33+ recommended)
+3. Start the emulator and wait for it to fully boot
+4. Set `BASE_URL` to `http://10.0.2.2:5000`
+
+**Option C — iOS simulator (Mac only)**
+1. Install [Xcode](https://developer.apple.com/xcode/) from the Mac App Store
+2. Open Xcode once to accept the license and finish setup
+3. Set `BASE_URL` to `http://localhost:5000`
+
 Start the Expo dev server:
 
 ```bash
 npx expo start
 ```
 
-Scan the QR code with the Expo Go app, or press `a` for Android emulator / `i` for iOS simulator.
+| Environment | What to do |
+|---|---|
+| Physical device | Scan the QR code with the Expo Go app |
+| Android emulator | Press `a` (emulator must already be running) |
+| iOS simulator | Press `i` (Mac only) |
 
 ---
 
@@ -336,6 +360,40 @@ ngrok http 5000
 ```
 
 Update `GOOGLE_CALLBACK_URL` and `KHALTI_RETURN_URL` in your `.env` to use the ngrok URL, and update `BASE_URL` in the mobile app.
+
+---
+
+### 6. Running the project 
+
+Once setup is complete, these are the commands to start everything:
+
+```bash
+# 1. Start PostgreSQL
+brew services start postgresql@14
+
+# 2. Start the backend (keeps it running in the background)
+cd Backend
+pm2 start npm -- run dev
+
+# 3. Check backend is running
+pm2 status
+
+# 4. Expose backend publicly (needed for OAuth + Khalti)
+ngrok http 5000
+
+# 5. Start the mobile app
+cd Frontend
+npx expo start --tunnel -c
+```
+
+**To stop everything:**
+
+```bash
+pm2 stop npm
+brew services stop postgresql@14
+```
+
+> `pm2` keeps the backend alive in the background so closing your terminal won't kill it. `--tunnel` means your phone doesn't need to be on the same WiFi as your laptop. `-c` clears the Expo cache.
 
 ---
 
